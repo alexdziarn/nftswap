@@ -1,57 +1,156 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import coolmansABI from './abis/coolmansUniverseABI.json';
-import fishyfamABI from './abis/fishyfamABI.json';
+import boredApeYachtClubABI from './abis/BoredApeYachtClub.json';
+import mutantApeYachtClubABI from './abis/MutantApeYachtClub.json';
+import boredApeKennelClubABI from './abis/BoredApeKennelClub.json';
+import cloneXABI from './abis/CloneX.json';
 
 const NftCards = (props) => {
 
   const [nfts, setNfts] = useState([]);
+  
 
+  function loadNfts() {
+    // loadBoredApeYachtClub();
+    loadMutantApeYachtClub();
+    loadBoredApeKennelClub();
+    loadCloneX();
+    loadCoolmans();
+  }
 
-
-  async function loadCoolmans() {
-    // loadscoolmans
-    const coolmansContractAddress = "0xa5C0Bd78D1667c13BFB403E2a3336871396713c5";
-    const coolmansContract = new window.web3.eth.Contract(coolmansABI.abi, coolmansContractAddress);
-    coolmansContract.methods.balanceOf(props.userAddress).call().then((bal) => {
+  //cloudflare giving 403 forbidden
+  async function loadBoredApeYachtClub() {
+    const address = "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D";
+    const contract = new window.web3.eth.Contract(boredApeYachtClubABI.abi, address);
+    contract.methods.balanceOf(props.userAddress).call().then((bal) => {
+      const arr = [];
       for(let i = 0; i < bal; i++) {
-        coolmansContract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
-          coolmansContract.methods.tokenURI(tokenNum).call().then((ipfs) => {
-            fetch('https://ipfs.io/ipfs/' + ipfs.replace('ipfs://', ''))
+        arr.push(contract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
+          contract.methods.tokenURI(tokenNum).call().then(async(ipfs) => {
+            console.log(ipfs);
+            await fetch('https://ipfs.io/ipfs/' + ipfs.replace('ipfs://', ''))
               .then((res) => {
                 return res.json()
               }).then((obj) => {
                 let newObj = obj;
+                console.log(newObj);
                 newObj.image = 'https://ipfs.io/ipfs/' + obj.image.replace('ipfs://', '')
+                newObj.name = `Bored Ape Yacht Club ${tokenNum}`;
                 setNfts(nfts => [...nfts, newObj])
               })
+              .catch((err) => {
+                console.error(err);
+              })
           })
-        })
+        }));
       }
     })
   }
 
-  async function loadFishyFam() {
-    // loads FishyFam
-    const fishyfamContractAddress = "0x63FA29Fec10C997851CCd2466Dad20E51B17C8aF";
-    const fishyfamContract = new window.web3.eth.Contract(fishyfamABI.abi, fishyfamContractAddress);
-    fishyfamContract.methods.walletOfOwner(props.userAddress).call().then((arrOfTokens) => {
-      for(let i = 0; i < arrOfTokens.length; i++) {
-        fishyfamContract.methods.tokenURI(arrOfTokens[i]).call().then((ipfs) => {
-          fetch(ipfs)
-            .then((res) => {
-              return res.json();
-            }).then((obj) => {
-              setNfts(nfts => [...nfts, obj])
-            })
-        })
+  async function loadMutantApeYachtClub() {
+    const address = "0x60E4d786628Fea6478F785A6d7e704777c86a7c6";
+    const contract = new window.web3.eth.Contract(mutantApeYachtClubABI.abi, address);
+    contract.methods.balanceOf(props.userAddress).call().then((bal) => {
+      const arr = [];
+      for(let i = 0; i < bal; i++) {
+        arr.push(contract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
+          contract.methods.tokenURI(tokenNum).call().then(async(ipfs) => {
+            await fetch(ipfs)
+              .then((res) => {
+                return res.json();
+              }).then((obj) => {
+                let newObj = obj;
+                newObj.image = 'https://cloudflare-ipfs.com/ipfs/' + obj.image.replace('ipfs://', '')
+                newObj.name = `Mutant Ape Yacht Club ${tokenNum}`;
+                setNfts(nfts => [...nfts, newObj])
+              })
+              .catch((err) => {
+                console.error(err);
+              })
+          })
+        }));
       }
     })
   }
 
+  async function loadBoredApeKennelClub() {
+    const address = "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623";
+    const contract = new window.web3.eth.Contract(boredApeKennelClubABI.abi, address);
+    contract.methods.balanceOf(props.userAddress).call().then((bal) => {
+      const arr = [];
+      for(let i = 0; i < bal; i++) {
+        arr.push(contract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
+          contract.methods.tokenURI(tokenNum).call().then(async(ipfs) => {
+            await fetch('https://cloudflare-ipfs.com/ipfs/' + ipfs.replace('ipfs://', ''), {mode:'cors'})
+              .then((res) => {
+                return res.json();
+              }).then((obj) => {
+                let newObj = obj;
+                newObj.image = 'https://cloudflare-ipfs.com/ipfs/' + obj.image.replace('ipfs://', '')
+                newObj.name = `Bored Ape Kennel Club ${tokenNum}`;
+                setNfts(nfts => [...nfts, newObj])
+              })
+              .catch((err) => {
+                console.error(err);
+              })
+          })
+        }));
+      }
+    })
+  }
+
+  async function loadCloneX() {
+    const address = "0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B";
+    const contract = new window.web3.eth.Contract(cloneXABI.abi, address);
+    contract.methods.balanceOf(props.userAddress).call().then((bal) => {
+      const arr = [];
+      for(let i = 0; i < bal; i++) {
+        arr.push(contract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
+          contract.methods.tokenURI(tokenNum).call().then(async(ipfs) => {
+            await fetch(ipfs)
+              .then((res) => {
+                return res.json();
+              }).then((obj) => {
+                setNfts(nfts => [...nfts, obj])
+              })
+              .catch((err) => {
+                console.error(err);
+              })
+          })
+        }));
+      }
+    })
+  }
+
+  async function loadCoolmans() {
+    const address = "0xa5C0Bd78D1667c13BFB403E2a3336871396713c5";
+    const contract = new window.web3.eth.Contract(coolmansABI.abi, address);
+    contract.methods.balanceOf(props.userAddress).call().then((bal) => {
+      const arr = [];
+      for(let i = 0; i < bal; i++) {
+        arr.push(contract.methods.tokenOfOwnerByIndex(props.userAddress, i).call().then((tokenNum) => {
+          contract.methods.tokenURI(tokenNum).call().then(async(ipfs) => {
+            await fetch('https://cloudflare-ipfs.com/ipfs/' + ipfs.replace('ipfs://', ''))
+              .then((res) => {
+                return res.json()
+              }).then((obj) => {
+                let newObj = obj;
+                newObj.image = 'https://cloudflare-ipfs.com/ipfs/' + obj.image.replace('ipfs://', '')
+                setNfts(nfts => [...nfts, newObj])
+              })
+              .catch((err) => {
+                console.error(err);
+              })
+          })
+        }));
+      }
+    });
+  }
+  
+  //setNfts(nfts => [...nfts, newObj])
   useEffect(() => {
-    loadCoolmans();
-    loadFishyFam();
+    loadNfts();
   }, []);
   
 
