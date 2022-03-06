@@ -42,7 +42,7 @@ function App() {
           <div className='your-items'>
             {
               connected ? 
-              <NftCards userAddress={accounts[0]}></NftCards>
+              <NftCards userAddress={"0x62251103308a69be7c27d22f81e4b2dfbe00c7cf"}></NftCards>
               : 
               <div>Connect Wallet to trade</div>
             }
