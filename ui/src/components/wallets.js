@@ -15,11 +15,11 @@ const Wallets = (props) => {
       </Modal.Header>
       <div className="wallets">
         <Button onClick={props.loadWeb3}>
-          <img src={metamask} alt="metamask wallet"></img>
+          <img className="m-auto" src={metamask} alt="metamask wallet"></img>
           <span>MetaMask</span>
         </Button>
         <Button onClick={props.loadWeb3}>
-          <img src={coinbasewallet} alt="coinbase wallet"></img>
+          <img className='m-auto' src={coinbasewallet} alt="coinbase wallet"></img>
           <span>Coinbase Wallet</span>
         </Button>
       </div>

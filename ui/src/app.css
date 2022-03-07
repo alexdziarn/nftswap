@@ -37,6 +37,12 @@
   }
 }
 
+.connect {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+}
+
 .wallets {
   display: flex;
   justify-content: flex-start;
@@ -57,32 +63,51 @@
 }
 
 .trade {
-  justify-content: space-between;
+  position: relative;
   display: flex;
+  min-height: 100vh;
   color: white;
   background-color: #282c34;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .left {
   width: 40%;
   margin: 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+.you-offer {
+  border: white 1px solid;
+  margin-top: 1em;
 }
 
 .your-items {
   border: white 1px solid;
   margin-top: 1em;
-  height: 500px;
+  height: calc(100%);
 }
 
 .right {
   width: 40%;
   margin: 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+.you-get {
+  border: white 1px solid;
+  margin-top: 1em;
 }
 
 .bank-items {
   border: white 1px solid;
   margin-top: 1em;
-  height: 500px;
+  height: calc(100%);
+  overflow-x: hidden;
 }
 
 .card {
@@ -138,4 +163,15 @@
 .nft-info:hover {
   opacity: 1;
   display: block;
+}
+.selected {
+  position: absolute;
+  display: flex;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;  
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
 }

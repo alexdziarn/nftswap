@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { solid } from '@fortawesome/fontawesome-svg-core/import.macro';
 import coolmansABI from './abis/coolmansUniverseABI.json';
 import boredApeYachtClubABI from './abis/BoredApeYachtClub.json';
 import mutantApeYachtClubABI from './abis/MutantApeYachtClub.json';
@@ -9,6 +11,7 @@ import cloneXABI from './abis/CloneX.json';
 const NftCards = (props) => {
 
   const [nfts, setNfts] = useState([]);
+  const [offers, setOffers] = useState([]);
   
 
   function loadNfts() {
@@ -149,29 +152,76 @@ const NftCards = (props) => {
   }
   
   //setNfts(nfts => [...nfts, newObj])
+
+  function addToOffer(nft) {
+    if(offers.filter(e => e.name === nft.name).length > 0) {
+      removeFromOffer(nft);
+    } else {
+      setOffers(nfts => [...nfts, nft]);
+    }
+  }
+  function removeFromOffer(nft) {
+    setOffers(offers.filter((e) => e.name !== nft.name))
+  }
+
   useEffect(() => {
     loadNfts();
   }, []);
   
 
   return (
-    <div className='userNfts'>
-      {
-        nfts.map(nft => {
-          return (
-            <Card className='card' key={nft.name}>
-              <img src={nft.image} alt={nft.name}/>
-              <div className='card-overlay'>
-                <div className='nft-info'>
-                  <span>{nft.name}</span>
-                  <span>Price:</span>
-                </div>
-              </div>
-              
-            </Card>
-          )
-        })
-      }
+    <div className='left'>
+      <div className='you-offer'>
+        <div className="d-flex justify-content-between">
+          <header>You offer:</header>
+          <header>Total: $<span></span></header>
+        </div>
+        <div className="d-flex flex-wrap">
+          {
+            offers.map(nft => {
+              return (
+                <Card className='card' key={nft.name} onClick={()=>{removeFromOffer(nft)}}>
+                  <img src={nft.image} alt={nft.name}/>
+                  <div className='card-overlay'>
+                    <div className='nft-info'>
+                      <span>{nft.name}</span>
+                      <span>Price:</span>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })
+          }
+        </div>
+      </div>
+      <div className='your-items'>
+        <div className="d-flex justify-content-between">
+          <header>Your NFTs:</header>
+          <Button className='float-right' onClick={()=>{setNfts([]);loadNfts();}}>Refresh</Button>
+        </div>
+        <div className='userNfts'>
+          {
+            nfts.map(nft => {
+              return (
+                <Card className='card' key={nft.name} onClick={()=>{addToOffer(nft)}}>
+                  <img src={nft.image} alt={nft.name}/>
+                  <div className='card-overlay'>
+                    <div className='nft-info'>
+                      <span>{nft.name}</span>
+                      <span>Price:</span>
+                    </div>
+                  </div>
+                  {offers.filter(e => e.name === nft.name).length > 0 && 
+                    <div className="selected">
+                      <FontAwesomeIcon className='m-auto d-block h-50' icon={solid('cart-shopping')} />
+                    </div>
+                  }
+                </Card>
+              )
+            })
+          }
+        </div>
+      </div>
     </div>
   )
 }

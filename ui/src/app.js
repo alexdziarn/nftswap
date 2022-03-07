@@ -17,7 +17,7 @@ function App() {
     try {
       if (window.ethereum) {
         window.web3 = new web3(window.ethereum);
-        setAccounts(await window.ethereum.request({ method: 'eth_requestAccounts' }))
+        setAccounts(await window.ethereum.request({ method: 'eth_requestAccounts' }));
         setShowWallets(false);
         setConnected(true);
       }
@@ -32,39 +32,21 @@ function App() {
 
   return (
     <div>
-      {connected ? null : <Button onClick={()=>{setShowWallets(true); console.log(showWallets)}}>Connect</Button>}
+      {connected ? null : <Button className='connect' onClick={()=>{setShowWallets(true)}}>Connect</Button>}
       <Wallets loadWeb3={loadWeb3} showWallets={showWallets} setShowWallets={setShowWallets}></Wallets>
       <div className='trade'>
-        <div className='left'>
-          <div className=''>
-            <header>Your NFTs:</header>
-          </div>
-          <div className='your-items'>
-            {
-              connected ? 
-              <NftCards userAddress={"0x62251103308a69be7c27d22f81e4b2dfbe00c7cf"}></NftCards>
-              : 
-              <div>Connect Wallet to trade</div>
-            }
-          </div>
-          <div className='selected-your-items'>
-            {
-              connected ? 
-              <div></div>
-              : 
-              <div></div>
-            }
-          </div>
-        </div>
+        {
+        connected ? 
+          <NftCards userAddress={"0x62251103308a69be7c27d22f81e4b2dfbe00c7cf"}></NftCards>
+        : 
+          <div>Connect Wallet to trade</div>
+        }
         <div className='right'>
-          <div className=''>
-            <header>Bank:</header>
+          <div className='you-get'>
+            <header>You get:</header>
           </div>
           <div className='bank-items'>
-
-          </div>
-          <div className='selected-bank-items'>
-
+            <header>Bank:</header>
           </div>
         </div>
         
