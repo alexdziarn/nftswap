@@ -41,6 +41,9 @@ function App() {
         : 
           <div>Connect Wallet to trade</div>
         }
+        <div className='middle'>
+          <Button>Trade</Button>
+        </div>
         <div className='right'>
           <div className='you-get'>
             <header>You get:</header>

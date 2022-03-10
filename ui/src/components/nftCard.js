@@ -176,7 +176,7 @@ const NftCards = (props) => {
           <header>You offer:</header>
           <header>Total: $<span></span></header>
         </div>
-        <div className="d-flex flex-wrap">
+        <div className="offers d-flex flex-wrap overflow-auto">
           {
             offers.map(nft => {
               return (
@@ -194,7 +194,7 @@ const NftCards = (props) => {
           }
         </div>
       </div>
-      <div className='your-items'>
+      <div className='your-items overflow-auto'>
         <div className="d-flex justify-content-between">
           <header>Your NFTs:</header>
           <Button className='float-right' onClick={()=>{setNfts([]);loadNfts();}}>Refresh</Button>
