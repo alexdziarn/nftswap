@@ -16,14 +16,14 @@ contract NftSwap {
   bool public stakingLive = false;
   uint public ownerFee = 100; // Basis Points;
   uint public communityFee = 100;
-  mapping (address => uint) internal balance; //uses user address
+  mapping (address => uint) internal stakeBalance; //uses user address
   mapping (address => collection) internal collections; //uses contract address
 
   constructor() {
   }
 
   function getBalance(address userAddress) public view returns (uint) {
-    return balance[userAddress];
+    return stakeBalance[userAddress];
   }
 
   function getCollection(address nftAddress) public view returns (collection) {
@@ -50,6 +50,7 @@ contract NftSwap {
       balance[msg.sender] += col.price;
       col.nftContract.transferFrom(msg.sender, address(this), tokenId);
       // transfer ERC20 credit to msg.sender
+      // transfer ERC20 credit to stakers balance
     }
   }
 
