@@ -21,7 +21,7 @@ contract NftSwap {
   uint public stakersFee = 100;
 
 
-  event AddCollection(collection newCollection);
+  event AddNft(address nftAddress, uint price);
   event SetPrices(collection[]);
   event DepositNfts(address indexed user, swap[] nfts);
   event WithdrawNfts(address indexed user, swap[] nfts);
@@ -41,50 +41,45 @@ contract NftSwap {
     uint tokenId;
   }
 
-  mapping (address => collection) internal collections; //uses contract address
+  mapping (address => uint) internal prices; // uses contract address
 
-  function getBalance(address userAddress) external view returns (uint) {
-    return balances[userAddress];
-  }
-
-  function getCollection(address nftAddress) external view returns (collection) {
+  function getPrice(address nftAddress) external view returns (collection) {
     return collections[nftAddress];
   }
 
-  function addCollection(address nftAddress, uint price) external onlyDelegates {
-    collection newCollection = collection(nftAddress, price, ERC721(nftAddress));
-    collections[nftAddress] = newCollection;
-    emit AddCollection(newCollection);
+  function addNft(address nftAddress, uint price) external onlyDelegates {
+    prices[nftAddress] = price;
+    emit AddNft(nftAddress, price);
   }
 
   function setPrices(collection[] newPrices) external onlyDelegates {
     uint len = newPrices.length;
     for(uint i=0; i < len; i++) {
-      collections[newPrices[i].tokenAddress].price = newPrices[i].price;
+      prices[newPrices[i].nftAddress] = newPrices[i].price;
     }
     emit SetPrices(newPrices);
   }
 
   // exchange Nfts for nftSwapCredits
   function depositNfts(swap[] nfts) external {
-    collection col = collections[nftAddress];
     uint total = 0;
     uint len = nfts.length;
     // transfer nfts from user to the contract, add NFTC based on value
     for(uint i=0; i<len; i++) {
       IERC721(nfts[i].nftAddress).transferFrom(msg.sender, address(this), nfts[i].tokenId);
-      total += collections[nfts[i].nftAddress].price;
+      total += prices[nfts[i].nftAddress];
     }
     // calculate cut for sender, owner, and stakers
-    uint senderCut = total - ownerCut - stakersCut;
     uint ownerCut = (total*ownerFee)/10000;
     uint stakersCut = (total*stakersFee)/10000;
+    uint senderCut = total - ownerCut - stakersCut;
     // send credit to sender
     nftSwapCredit.transfer(msg.sender, senderCut);
     // send credit to owner
     nftSwapCredit.transfer(owner(), ownerCut);
     // increase share value for stakers
-    sharePrice *= 1 + (stakersCut/totalStaked);
+    sharePrice *= 1 + (stakersCut/totalCreditStaked);
+    totalCreditStaked += stakersCut;
     emit DepositNfts(msg.sender, nfts);
   }
 
@@ -92,7 +87,7 @@ contract NftSwap {
   function withdrawNfts(swap[] nfts) external {
     uint len = nfts.length;
     for(uint i=0; i<len; i++) {
-      uint nftPrice = collections[nfts[i].nftAddress].price;
+      uint nftPrice = prices[nfts[i].nftAddress];
       // require sender to have enough nftSwapCredit in account
       require(nftSwapCredit.getBalance(msg.sender) > nftPrice, "Not enough credits in wallet");
       IERC721(nfts[i].nftAddress).transfer(msg.sender, nfts[i].tokenId);
