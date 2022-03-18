@@ -22,16 +22,16 @@ contract NftSwap {
 
 
   event AddCollection(collection newCollection);
-  event SetPrices();
+  event SetPrices(collection[]);
   event DepositNfts(address indexed user, swap[] nfts);
   event WithdrawNfts(address indexed user, swap[] nfts);
+  event SwapNfts(address indexed user, swap[] inboundNfts, swap[] outboundNfts);
   event Stake(address indexed user, uint amount);
   event Unstake(address indexed user, uint amount);
   event SetOwnerFee(uint fee);
   event SetStakersFee(uint fee);
 
   struct collection {
-    string name;
     address nftAddress;
     uint price;
   }
@@ -51,8 +51,8 @@ contract NftSwap {
     return collections[nftAddress];
   }
 
-  function addCollection(string name, address nftAddress, uint price) external onlyDelegates {
-    collection newCollection = collection(name, nftAddress, price, ERC721(nftAddress));
+  function addCollection(address nftAddress, uint price) external onlyDelegates {
+    collection newCollection = collection(nftAddress, price, ERC721(nftAddress));
     collections[nftAddress] = newCollection;
     emit AddCollection(newCollection);
   }
@@ -62,7 +62,7 @@ contract NftSwap {
     for(uint i=0; i < len; i++) {
       collections[newPrices[i].tokenAddress].price = newPrices[i].price;
     }
-    emit SetPrices();
+    emit SetPrices(newPrices);
   }
 
   // exchange Nfts for nftSwapCredits
@@ -85,12 +85,7 @@ contract NftSwap {
     nftSwapCredit.transfer(owner(), ownerCut);
     // increase share value for stakers
     sharePrice *= 1 + (stakersCut/totalStaked);
-    emit DepositNfts();
-  }
-
-  // exchange Nfts for Nfts, leftover value is given in nftSwapCredits
-  function swapNfts(swap[] incomingNfts, swap[] outboundNfts) external {
-
+    emit DepositNfts(msg.sender, nfts);
   }
 
   // exchange nftSwapCredits for NFTs
@@ -103,6 +98,14 @@ contract NftSwap {
       IERC721(nfts[i].nftAddress).transfer(msg.sender, nfts[i].tokenId);
       nftSwapCredit.transferFrom(msg.sender, address(this), nftPrice);
     }
+    emit WithdrawNfts(msg.sender, nfts);
+  }
+
+  // exchange Nfts for Nfts, leftover value is given in nftSwapCredits
+  function swapNfts(swap[] inboundNfts, swap[] outboundNfts) external {
+    depositNfts(inboundNfts);
+    withdrawNfts(outboundNfts);
+    emit SwapNfts(msg.sender, inboundNfts, outboundNfts);
   }
 
   function stake(uint amount) external {
