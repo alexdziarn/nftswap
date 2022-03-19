@@ -2,12 +2,16 @@
 pragma solidity ^0.8.12;
 
 import './Delegated.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
-import './NftSwapCredit.sol';
 
-contract NftSwap {
+contract NftSwap is Delegated {
 
   IERC20 public immutable nftSwapCredit;
+
+  constructor(address nftSwapCredit20) {
+    nftSwapCredit = IERC20(nftSwapCredit20);
+  }
 
   uint public totalCreditStaked = 0;
   uint public totalShares = 0;
@@ -43,8 +47,8 @@ contract NftSwap {
 
   mapping (address => uint) internal prices; // uses contract address
 
-  function getPrice(address nftAddress) external view returns (collection) {
-    return collections[nftAddress];
+  function getPrice(address nftAddress) external view returns (uint) {
+    return prices[nftAddress];
   }
 
   function addNft(address nftAddress, uint price) external onlyDelegates {
@@ -52,7 +56,7 @@ contract NftSwap {
     emit AddNft(nftAddress, price);
   }
 
-  function setPrices(collection[] newPrices) external onlyDelegates {
+  function setPrices(collection[] calldata newPrices) external onlyDelegates {
     uint len = newPrices.length;
     for(uint i=0; i < len; i++) {
       prices[newPrices[i].nftAddress] = newPrices[i].price;
@@ -61,7 +65,7 @@ contract NftSwap {
   }
 
   // exchange Nfts for nftSwapCredits
-  function depositNfts(swap[] nfts) external {
+  function depositNfts(swap[] calldata nfts) public {
     uint total = 0;
     uint len = nfts.length;
     // transfer nfts from user to the contract, add NFTC based on value
@@ -84,20 +88,20 @@ contract NftSwap {
   }
 
   // exchange nftSwapCredits for NFTs
-  function withdrawNfts(swap[] nfts) external {
+  function withdrawNfts(swap[] calldata nfts) public {
     uint len = nfts.length;
     for(uint i=0; i<len; i++) {
       uint nftPrice = prices[nfts[i].nftAddress];
       // require sender to have enough nftSwapCredit in account
-      require(nftSwapCredit.getBalance(msg.sender) > nftPrice, "Not enough credits in wallet");
-      IERC721(nfts[i].nftAddress).transfer(msg.sender, nfts[i].tokenId);
+      require(nftSwapCredit.balanceOf(msg.sender) > nftPrice, "Not enough credits in wallet");
+      IERC721(nfts[i].nftAddress).transferFrom(address(this), msg.sender, nfts[i].tokenId);
       nftSwapCredit.transferFrom(msg.sender, address(this), nftPrice);
     }
     emit WithdrawNfts(msg.sender, nfts);
   }
 
   // exchange Nfts for Nfts, leftover value is given in nftSwapCredits
-  function swapNfts(swap[] inboundNfts, swap[] outboundNfts) external {
+  function swapNfts(swap[] calldata inboundNfts, swap[] calldata outboundNfts) external {
     depositNfts(inboundNfts);
     withdrawNfts(outboundNfts);
     emit SwapNfts(msg.sender, inboundNfts, outboundNfts);
@@ -123,11 +127,11 @@ contract NftSwap {
     emit Unstake(msg.sender, sharesToUnstake);
   }
 
-  function calculateCreditToShare(uint amount) internal {
+  function calculateCreditToShare(uint amount) internal view returns(uint) {
     return amount/sharePrice;
   }
 
-  function calculateShareToCredit(uint amount) internal {
+  function calculateShareToCredit(uint amount) internal view returns(uint) {
     return amount*sharePrice;
   }
 
@@ -137,7 +141,7 @@ contract NftSwap {
   }
 
   function setStakersFee(uint fee) external onlyDelegates {
-    stakerFee = fee;
+    stakersFee = fee;
     emit SetStakersFee(fee);
   }
 }
