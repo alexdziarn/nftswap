@@ -2,15 +2,13 @@
 pragma solidity ^0.8.12;
 
 import './Delegated.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
-contract NftSwap is Delegated {
+contract NftSwap is ERC20, Delegated {
 
-  IERC20 public immutable nftSwapCredit;
-
-  constructor(address nftSwapCredit20) {
-    nftSwapCredit = IERC20(nftSwapCredit20);
+  constructor() ERC20("NftSwap Credit", "NFTC") {
   }
 
   uint public totalCreditStaked = 0;
@@ -70,6 +68,7 @@ contract NftSwap is Delegated {
     uint len = nfts.length;
     // transfer nfts from user to the contract, add NFTC based on value
     for(uint i=0; i<len; i++) {
+      require(prices[nfts[i].nftAddress] > 0);
       IERC721(nfts[i].nftAddress).transferFrom(msg.sender, address(this), nfts[i].tokenId);
       total += prices[nfts[i].nftAddress];
     }
@@ -77,12 +76,14 @@ contract NftSwap is Delegated {
     uint ownerCut = (total*ownerFee)/10000;
     uint stakersCut = (total*stakersFee)/10000;
     uint senderCut = total - ownerCut - stakersCut;
-    // send credit to sender
-    nftSwapCredit.transfer(msg.sender, senderCut);
-    // send credit to owner
-    nftSwapCredit.transfer(owner(), ownerCut);
+    // mint credits to sender
+    _mint(msg.sender, senderCut);
+    // mint credits to owner
+    _mint(owner(), ownerCut);
     // increase share value for stakers
-    sharePrice *= 1 + (stakersCut/totalCreditStaked);
+    if(totalCreditStaked != 0) {
+      sharePrice *= 1 + (stakersCut/totalCreditStaked);
+    }
     totalCreditStaked += stakersCut;
     emit DepositNfts(msg.sender, nfts);
   }
@@ -93,9 +94,10 @@ contract NftSwap is Delegated {
     for(uint i=0; i<len; i++) {
       uint nftPrice = prices[nfts[i].nftAddress];
       // require sender to have enough nftSwapCredit in account
-      require(nftSwapCredit.balanceOf(msg.sender) > nftPrice, "Not enough credits in wallet");
+      require(balanceOf(msg.sender) > nftPrice, "Not enough credits in wallet");
       IERC721(nfts[i].nftAddress).transferFrom(address(this), msg.sender, nfts[i].tokenId);
-      nftSwapCredit.transferFrom(msg.sender, address(this), nftPrice);
+      // burns tokens
+      _burn(msg.sender, nftPrice);
     }
     emit WithdrawNfts(msg.sender, nfts);
   }
@@ -108,7 +110,7 @@ contract NftSwap is Delegated {
   }
 
   function stake(uint amount) external {
-    nftSwapCredit.transferFrom(msg.sender, address(this), amount);
+    transferFrom(msg.sender, address(this), amount);
     // adds total credits staked
     totalCreditStaked += amount;
     uint sharesToReceive = calculateCreditToShare(amount);
@@ -121,7 +123,7 @@ contract NftSwap is Delegated {
     // checks if they have the amount of shares to unstake
     uint sharesToUnstake = calculateCreditToShare(amount);
     require(shares[msg.sender] >= sharesToUnstake, "Not enough credits to unstake");
-    nftSwapCredit.transfer(msg.sender, amount);
+    transfer(msg.sender, amount);
     totalShares -= sharesToUnstake;
     shares[msg.sender] -= sharesToUnstake;
     emit Unstake(msg.sender, sharesToUnstake);
