@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "ts-node app.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/axios": "^0.14.0",
     "@types/cheerio": "^0.22.31",
+    "https": "^1.0.0",
+    "ts-node": "^10.7.0",
     "typescript": "^4.6.2"
   }
 }
