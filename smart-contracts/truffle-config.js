@@ -37,5 +37,16 @@ module.exports = {
     //     directory: ".db"
     //   }
     // }
-  // }
+  // },
+  compilers: {
+    solc: {
+      version: "0.8.12",
+      settings: {
+        optimizer: {
+          enabled: true, // Default: false
+          runs: 200      // Default: 200
+        },
+      }
+    }
+  }
 };
