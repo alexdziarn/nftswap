@@ -11,17 +11,14 @@ contract NftSwap is ERC20, Delegated {
   constructor() ERC20("NftSwap Credit", "NFTC") {
   }
 
-  uint public totalCreditStaked = 0;
   uint public totalShares = 0;
-  mapping(address => uint) public shares;
+  mapping(address => uint) private shares;
 
   uint public constant PRECISION_FACTOR = 10**18;
-  uint sharePrice = PRECISION_FACTOR;
 
   // fees for owner and stakers
   uint public ownerFee = 100; //Basis Points
   uint public stakersFee = 100;
-
 
   event AddNft(address nftAddress, uint price);
   event SetPrices(collection[]);
@@ -80,11 +77,8 @@ contract NftSwap is ERC20, Delegated {
     _mint(msg.sender, senderCut);
     // mint credits to owner
     _mint(owner(), ownerCut);
-    // increase share value for stakers
-    if(totalCreditStaked != 0) {
-      sharePrice *= 1 + (stakersCut/totalCreditStaked);
-    }
-    totalCreditStaked += stakersCut;
+    // mint credits to staking contract
+    _mint(address(this), stakersCut);
     emit DepositNfts(msg.sender, nfts);
   }
 
@@ -110,31 +104,43 @@ contract NftSwap is ERC20, Delegated {
   }
 
   function stake(uint amount) external {
-    transferFrom(msg.sender, address(this), amount);
-    // adds total credits staked
-    totalCreditStaked += amount;
     uint sharesToReceive = calculateCreditToShare(amount);
+    _transfer(msg.sender, address(this), amount);
     totalShares += sharesToReceive;
     shares[msg.sender] += sharesToReceive;
-    emit Stake(msg.sender, sharesToReceive);
+    emit Stake(msg.sender, sharesToReceive); //change to amount
   }
 
   function unstake(uint amount) external {
     // checks if they have the amount of shares to unstake
     uint sharesToUnstake = calculateCreditToShare(amount);
     require(shares[msg.sender] >= sharesToUnstake, "Not enough credits to unstake");
-    transfer(msg.sender, amount);
+    _transfer(address(this), msg.sender, amount);
     totalShares -= sharesToUnstake;
     shares[msg.sender] -= sharesToUnstake;
-    emit Unstake(msg.sender, sharesToUnstake);
+    emit Unstake(msg.sender, sharesToUnstake); // change to amount
   }
 
-  function calculateCreditToShare(uint amount) internal view returns(uint) {
-    return amount/sharePrice;
+  function calculateCreditToShare(uint creditAmount) public view returns(uint) {
+    return (creditAmount*PRECISION_FACTOR)/getSharePrice();
   }
 
-  function calculateShareToCredit(uint amount) internal view returns(uint) {
-    return amount*sharePrice;
+  function calculateShareToCredit(uint shareAmount) public view returns(uint) {
+    return (shareAmount*getSharePrice())/PRECISION_FACTOR;
+  }
+
+  function getSharePrice() public view returns (uint) {
+    if(balanceOf(address(this)) > 0 && totalShares > 0) {
+      return balanceOf(address(this))*PRECISION_FACTOR/totalShares;
+    } else if(balanceOf(address(this)) > 0) {
+      return balanceOf(address(this));
+    } else {
+      return PRECISION_FACTOR;
+    }
+  }
+
+  function getShares(address account) external view returns(uint) {
+    return shares[account];
   }
 
   function setOwnerFee(uint fee) external onlyDelegates {
