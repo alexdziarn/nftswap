@@ -20252,12 +20252,12 @@
         }
       },
       "links": {},
-      "address": "0x27681B20E0a02D0ccc2BDbe03827d2B9418c4ffd",
-      "transactionHash": "0xd969fcec8f42c8d2444daec1c6b2f6fe438d9b8414bd44fc440dd65a64c02fd6"
+      "address": "0x5DB9a9AA8ae2E9C2f7a1BB7abC833f0c8f8585c3",
+      "transactionHash": "0xfa9b8c48a4e0f2e8524143c15fb8050638f209fa1c4d2528a9e046da4dab69e3"
     }
   },
   "schemaVersion": "3.4.5",
-  "updatedAt": "2022-03-19T06:16:05.949Z",
+  "updatedAt": "2022-03-20T23:41:23.750Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "{ERC721} token, including:  - ability for holders to burn (destroy) their tokens  - a minter role that allows for token minting (creation)  - a pauser role that allows to stop all token transfers  - token ID and URI autogeneration This contract uses {AccessControl} to lock permissioned functions using the different roles - head to its documentation for details. The account that deploys the contract will be granted the minter and pauser roles, as well as the default admin role, which will let it grant both minter and pauser roles to other accounts. _Deprecated in favor of https://wizard.openzeppelin.com/[Contracts Wizard]._",
