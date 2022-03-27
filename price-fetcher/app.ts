@@ -1,33 +1,30 @@
-//import axios from 'axios';
+var axios = require("axios").default;
 import https from 'https';
-const url = 'https://api.opensea.io/api/v1/assets' 
-const tesUrl = 'https://www.google.com'
-//const AxiosInstance = axios.create();  
+const url = 'https://opensea.io/rankings'  //could do another API like: 'https://api.opensea.io/api/v1/assets' 
 
 function priceFetch( nfts: any[]): string[] {
 	
 	const prices: string[] = [];	
+        
+	console.log(url);
 
-	for( let nft of nfts ) {
+	var options = {
+  		method: 'POST',
+  		url: 'https://scrapeninja.p.rapidapi.com/scrape',
+  		headers: {
+    		'content-type': 'application/json',
+    		'X-RapidAPI-Host': 'scrapeninja.p.rapidapi.com',
+    		'X-RapidAPI-Key': 'f474913de8msh02641f9cd5b4ce2p1ad271jsn9dcc053d6f1c'
+  	},
+  		data: {url: url}
+	};
 
-		https.get(url, (res) => {
-  			console.log('statusCode:', res.statusCode);
-  			//console.log('headers:', res.headers);
-
-  			//res.on('data', (d) => {
-    			//process.stdout.write(d);
-  		}).on('error', (e) => {
-  			console.error(e);
-		});
-		/* AxiosInstance.get(url)
-  		   .then( // for each nft grab html of page with price
-    			response => {
-      				const html = response.data; 
-      				console.log(html);
-			}).catch(console.error);
-	}	
-        */
-	}
+	axios.request(options).then(function (response: any) {
+		console.log(response.data);
+	}).catch(function (error: any) {
+		console.error(error);
+	});
+	
 	return prices
 }
 
