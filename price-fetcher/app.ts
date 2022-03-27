@@ -7,7 +7,7 @@ interface Collection {
 	price: number
 }
 
-export function priceFetch(name: string): string[] {
+export function price_fetch(name: string): string[] {
 		 
 	const stat_array: string[] = [];
 	const usable_url = url + name
@@ -25,9 +25,7 @@ export function priceFetch(name: string): string[] {
 	};
 
 	axios.request(options).then(function (res: any) {
-		
-		
-		
+				
 		const body = res.data.body;
 		const search_term = 'Overflowreact__OverflowContainer-sc-7qr9y8-0 jPSCbX'; // class name used divs of the 'main' 4 stats
 		let tracker = 0;
@@ -51,15 +49,12 @@ export function priceFetch(name: string): string[] {
 
 	const obj = collectionConstructor(name, stat_array[2])	
 
-
 	}).catch(function (error: any) {
 		console.error(error);
 	});
 
-	
 	return stat_array;
 }
-
 
 function collectionConstructor(name: string, price: string) {
 	return {

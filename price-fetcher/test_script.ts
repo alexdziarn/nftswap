@@ -1,7 +1,7 @@
-import {priceFetch} from './app';
+import {price_fetch} from './app';
 
 function grabNewPrices(name: string): void {
-	const arr = priceFetch(name);
+	const arr = price_fetch(name);
 }
 
 if (require.main === module) {
