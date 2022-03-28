@@ -19,7 +19,7 @@ export function price_fetch(name: string): string[] {
   		headers: {
     		'content-type': 'application/json',
     		'X-RapidAPI-Host': 'scrapeninja.p.rapidapi.com',
-    		'X-RapidAPI-Key': 'f474913de8msh02641f9cd5b4ce2p1ad271jsn9dcc053d6f1c'
+    		'X-RapidAPI-Key': 'INSERT KEY' // TODO set up env variables 
   		},
   		data: {url: usable_url}
 	};
